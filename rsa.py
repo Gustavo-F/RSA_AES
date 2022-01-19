@@ -1,9 +1,9 @@
 import csv
 import random
 import datetime
-from string import ascii_letters
 from Cryptodome.PublicKey import RSA
 from Cryptodome.Cipher import PKCS1_OAEP
+from string import ascii_letters, digits
 
 
 message_sizes = [128, 320, 512, 1024, 2048]
@@ -31,7 +31,7 @@ def decrypt_message(key_pair, encrypted_message):
 
 
 def generate_message(message_size):
-    message = ''.join(random.choice(ascii_letters) for i in range(message_size))
+    message = ''.join(random.choice(ascii_letters + digits) for i in range(message_size))
 
     return message
 
@@ -61,13 +61,13 @@ def encryption_tests(key_size):
                 start = datetime.datetime.now()
                 encrypted_message = encrypt_message(public_key, message)
                 end = datetime.datetime.now()
-                encryption_time = (end - start).total_seconds()
+                encryption_time = (end - start).total_seconds() * 1000
 
                 # Decryption
                 start = datetime.datetime.now()
                 decrypted_message = decrypt_message(key_pair, encrypted_message)
                 end = datetime.datetime.now()
-                decryption_time = (end - start).total_seconds()
+                decryption_time = (end - start).total_seconds() * 1000
 
             else:
                 splited_messages = [message[j:j+max_size] for j in range(0, len(message), max_size)]
@@ -77,19 +77,24 @@ def encryption_tests(key_size):
                 for index, message in enumerate(splited_messages):
                     splited_messages[index] = encrypt_message(public_key, message)
                 end = datetime.datetime.now()
-                encryption_time = (end - start).total_seconds()
+                encryption_time = (end - start).total_seconds() * 1000
 
                 # Decryption
                 start = datetime.datetime.now()
                 for encrypted_message in splited_messages:
                     decrypt_message(key_pair, encrypted_message)
                 end = datetime.datetime.now()
-                decryption_time = (end - start).total_seconds()
+                decryption_time = (end - start).total_seconds() * 1000
 
             results.append({'id': i + 1, 'encrypt_time': encryption_time, 'decryption_time': decryption_time})
         
         create_csv_file(f'rsa-{str(key_size)}-{str(message_size)}.csv', results)
 
 
-encryption_tests(1024)
-encryption_tests(4096)
+def main():    
+    encryption_tests(1024)
+    encryption_tests(4096)
+
+
+if __name__ == '__main__':
+    main()
